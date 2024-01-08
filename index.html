@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparison Based Sorting</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+</head>
+<body>
+    <div class="heading">
+     <h1>Comparison Sorting Algorithms</h1>
+    </div>
+    <div class="button-div">
+  <button onclick="randomizeArray()">Randomize Array</button>
+  <button onclick="insertionSort()">Insertion Sort</button>
+  <button onclick="selectionSort()">Selection Sort</button>
+  <button onclick="bubbleSort()">Bubble Sort</button>
+  <button onclick="quickSort()">Quick Sort</button>
+  <button onclick="mergeSort()">Merge Sort</button>
+  <button onclick="shellSort()">Shell Sort</button>
+  <button onclick="changeSize()">Change Size</button>
+</div>
+
+  <canvas id="barCanvas" width="600" height="300"></canvas>
+
+  <script>
+    const values = [90, 6, 56, 56, 82, 33, 16, 34, 41, 80, 10, 24, 74, 67, 27, 54, 49, 19, 1, 25, 98, 89, 26, 24, 3, 29, 78, 49, 99, 64, 82, 74, 8, 13, 73, 13, 10, 13, 85, 91, 45, 56, 75, 50, 5, 77, 15, 33, 12, 38];
+    const canvas = document.getElementById('barCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let myBarChart;
+
+    function drawBars() {
+      if (myBarChart) {
+        myBarChart.destroy();
+      }
+
+      myBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: values.map((value, index) => value.toString()), 
+          datasets: [{
+            label: 'Values',
+            data: values,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              type: 'category',
+              position: 'bottom',
+              ticks: { stepSize: 1 }
+            },
+            y: { beginAtZero: true }
+          },
+          plugins: {
+            datalabels: {
+              anchor: 'center',
+              align: 'center',
+              display: 'auto',
+              color: 'black'
+            }
+          }
+        }
+      });
+    }
+
+    function randomizeArray() {
+      for (let i = values.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [values[i], values[j]] = [values[j], values[i]];
+      }
+      drawBars();
+    }
+
+    function insertionSort() {
+      for (let i = 1; i < values.length; i++) {
+        let key = values[i];
+        let j = i - 1;
+        while (j >= 0 && values[j] > key) {
+          values[j + 1] = values[j];
+          j = j - 1;
+        }
+        values[j + 1] = key;
+        drawBars();
+      }
+    }
+
+    function selectionSort() {
+      for (let i = 0; i < values.length - 1; i++) {
+        let minIndex = i;
+        for (let j = i + 1; j < values.length; j++) {
+          if (values[j] < values[minIndex]) {
+            minIndex = j;
+          }
+        }
+        [values[i], values[minIndex]] = [values[minIndex], values[i]];
+        drawBars();
+      }
+    }
+
+    function bubbleSort() {
+      for (let i = 0; i < values.length - 1; i++) {
+        for (let j = 0; j < values.length - i - 1; j++) {
+          if (values[j] > values[j + 1]) {
+            [values[j], values[j + 1]] = [values[j + 1], values[j]];
+            drawBars();
+          }
+        }
+      }
+    }
+
+    function quickSort() {
+      async function partition(low, high) {
+        let pivot = values[high];
+        let i = low - 1;
+        for (let j = low; j < high; j++) {
+          if (values[j] < pivot) {
+            i++;
+            [values[i], values[j]] = [values[j], values[i]];
+            drawBars();
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+        }
+        [values[i + 1], values[high]] = [values[high], values[i + 1]];
+        return i + 1;
+      }
+
+      async function quickSortHelper(low, high) {
+        if (low < high) {
+          let pi = await partition(low, high);
+          await quickSortHelper(low, pi - 1);
+          await quickSortHelper(pi + 1, high);
+        }
+      }
+
+      quickSortHelper(0, values.length - 1);
+    }
+
+    function mergeSort() {
+      async function merge(l, m, r) {
+        let n1 = m - l + 1;
+        let n2 = r - m;
+
+        let L = new Array(n1);
+        let R = new Array(n2);
+
+        for (let i = 0; i < n1; i++) {
+          L[i] = values[l + i];
+        }
+        for (let j = 0; j < n2; j++) {
+          R[j] = values[m + 1 + j];
+        }
+
+        let i = 0, j = 0, k = l;
+        while (i < n1 && j < n2) {
+          if (L[i] <= R[j]) {
+            values[k] = L[i];
+            i++;
+          } else {
+            values[k] = R[j];
+            j++;
+          }
+          k++;
+          drawBars();
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+
+        while (i < n1) {
+          values[k] = L[i];
+          i++;
+          k++;
+          drawBars();
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+
+        while (j < n2) {
+          values[k] = R[j];
+          j++;
+          k++;
+          drawBars();
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+      }
+
+      async function mergeSortHelper(l, r) {
+        if (l < r) {
+          let m = Math.floor((l + r) / 2);
+          await mergeSortHelper(l, m);
+          await mergeSortHelper(m + 1, r);
+          await merge(l, m, r);
+        }
+      }
+
+      mergeSortHelper(0, values.length - 1);
+    }
+
+    function shellSort() {
+      let n = values.length;
+      for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
+        for (let i = gap; i < n; i++) {
+          let temp = values[i];
+          let j;
+          for (j = i; j >= gap && values[j - gap] > temp; j -= gap) {
+            values[j] = values[j - gap];
+            drawBars();
+          }
+          values[j] = temp;
+        }
+      }
+      drawBars();
+    }
+
+    function changeSize() {
+      // Shrink the size of bars
+      const scaleFactor = 0.8; 
+
+      for (let i = 0; i < values.length; i++) {
+        values[i] *= scaleFactor;
+      }
+
+      drawBars();
+    }
+
+    // Initial draw of bars
+    drawBars();
+  </script>
+  </div>
+</body>
+</html>
